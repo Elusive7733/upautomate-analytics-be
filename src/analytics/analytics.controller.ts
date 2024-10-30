@@ -1,7 +1,8 @@
 import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
-import { ApiResponse } from 'src/shared/types/api-response.type';
-import { User } from './schemas/user.schema';
+import { ApiResponse } from '../shared/types/api-response.type';
+import { UserAnalytics } from './types/user-analytics.type';
+
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -10,7 +11,7 @@ export class AnalyticsController {
   @Get(':days')
   async getAnalytics(
     @Param('days', ParseIntPipe) days: number
-  ): Promise<ApiResponse<User[]>> {
+  ): Promise<ApiResponse<UserAnalytics>> {
     return this.analyticsService.getAnalytics(days);
   }
 } 
