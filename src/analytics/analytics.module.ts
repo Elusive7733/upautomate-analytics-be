@@ -7,7 +7,13 @@ import { AnalyticsService } from './analytics.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { 
+        name: User.name, 
+        schema: UserSchema,
+        collection: 'user'
+      }
+    ]),
   ],
   controllers: [AnalyticsController],
   providers: [AnalyticsService],
