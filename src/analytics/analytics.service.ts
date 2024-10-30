@@ -10,40 +10,46 @@ export class AnalyticsService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
-  async getAnalytics(): Promise<ApiResponse<User[]>> {
+  async getAnalytics(days: number): Promise<ApiResponse<User[]>> {
     try {
-      const users = await this.userModel.collection
-        .find(
-          {},
-          {
-            projection: {
-              _id: 0,
-              date_created: 0,
-              password: 0,
-              feeds: 0,
-              rss: 0,
-              upwork_accounts: 0,
-              validation_prompts: 0,
-              notifications: 0,
-            },
+      const dateFilter = new Date();
+      dateFilter.setDate(dateFilter.getDate() - days);
+
+      const users = await this.userModel
+        .find({
+          date_created: { 
+            $gte: dateFilter 
           }
-        )
-        .toArray();
+        })
+        .populate({
+          path: 'plan_id',
+          model: 'plan',
+          select: { _id: 0 }
+        })
+        .populate({
+          path: 'limits_id',
+          model: 'user_limits',
+          select: { _id: 0 }
+        })
+        .select({ _id: 0 })
+        .lean()
+        .exec();
 
       if (!users || users.length === 0) {
         return {
           statusCode: 404,
-          message: 'Users not found',
+          message: `No users found in the last ${days} days`,
           data: null
         };
       }
 
       return {
         statusCode: 200,
-        message: 'Users detail fetched successfully',
+        message: `Users created in the last ${days} days fetched successfully`,
         data: users as User[]
       };
     } catch (error) {
+      console.error('Error fetching users:', error);
       return {
         statusCode: 500,
         message: 'Something went wrong',

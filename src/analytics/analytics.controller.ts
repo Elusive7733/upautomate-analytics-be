@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 import { ApiResponse } from 'src/shared/types/api-response.type';
 import { User } from './schemas/user.schema';
@@ -7,8 +7,10 @@ import { User } from './schemas/user.schema';
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
-  @Get()
-  async getAnalytics(): Promise<ApiResponse<User[]>> {
-    return this.analyticsService.getAnalytics();
+  @Get(':days')
+  async getAnalytics(
+    @Param('days', ParseIntPipe) days: number
+  ): Promise<ApiResponse<User[]>> {
+    return this.analyticsService.getAnalytics(days);
   }
 } 
