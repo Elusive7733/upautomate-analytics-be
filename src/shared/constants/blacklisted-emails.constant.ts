@@ -1,0 +1,19 @@
+export const BLACKLISTED_EMAILS = [
+  'ufawad0@gmail.com',
+  'usman@bleedai.com',
+  'exactserv05@gmail.com',
+  'momin@bleedai.com',
+  'ahat2018@gmail.com',
+  'sherazi7174@gmail.com',
+  'abdullahraheel@bleedai.com',
+  'abdullaharaheel@gmail.com',
+  'arehman@bleedai.com',
+  'sophiya136@gmail.com',
+  'sophiya.imran@bleedai.com',
+  'bleedaigeneral@gmail.com',
+  'taha01xx@gmail.com',
+  'faakhirzahid@bleedai.com',
+  'linux@gmail.com',
+  'arshiirazii@gmail.com',
+  'zahidfaakhir@gmail.com'
+]; 
