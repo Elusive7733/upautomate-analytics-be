@@ -8,7 +8,7 @@ import { BLACKLISTED_EMAILS } from '../shared/constants/blacklisted-emails.const
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name) private readonly userModel: Model<User>,
+    @InjectModel('user') private readonly userModel: Model<User>,
   ) {}
 
   async getAllUsers(): Promise<ApiResponse<User[]>> {
@@ -19,15 +19,12 @@ export class UsersService {
         })
         .populate({
           path: 'plan_id',
-          model: 'plan',
-          select: { _id: 0 }
+          model: 'plan'
         })
         .populate({
           path: 'limits_id',
-          model: 'user_limits',
-          select: { _id: 0 }
+          model: 'user_limits'
         })
-        .select({ _id: 0 })
         .lean()
         .exec();
 
@@ -38,7 +35,7 @@ export class UsersService {
           data: null
         };
       }
-
+      
       return {
         statusCode: 200,
         message: 'Users retrieved successfully',
