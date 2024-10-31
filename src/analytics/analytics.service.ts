@@ -1,14 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { User } from './schemas/user.schema';
 import { ApiResponse } from '../shared/types/api-response.type';
-import { UserAnalytics } from './types/user-analytics.type';
+import { UserAnalytics, DailyUserDistribution } from './types/user-analytics.type';
 import { UsersService } from '../users/users.service';
 import { 
   calculatePlanAnalytics, 
   filterUsersByDateRange, 
   createMetricComparison,
   calculateAverage,
-  calculateRetentionMetrics 
+  calculateRetentionMetrics,
+  calculateDailyDistribution
 } from './helpers/analytics.helper';
 
 @Injectable()
@@ -175,6 +176,39 @@ export class AnalyticsService {
       };
     } catch (error) {
       this.logger.error('Error generating analytics:', error);
+      return {
+        statusCode: 500,
+        message: 'Something went wrong',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  async getDailyDistribution(): Promise<ApiResponse<DailyUserDistribution[]>> {
+    this.logger.log('Starting daily distribution calculation');
+    
+    try {
+      const usersResponse = await this.usersService.getAllUsers();
+      
+      if (!usersResponse.data || usersResponse.statusCode !== 200) {
+        this.logger.warn('Failed to fetch users:', usersResponse);
+        return {
+          statusCode: usersResponse.statusCode,
+          message: usersResponse.message,
+          data: null,
+          error: usersResponse.error
+        };
+      }
+
+      const distribution = calculateDailyDistribution(usersResponse.data);
+
+      return {
+        statusCode: 200,
+        message: 'Daily distribution generated successfully',
+        data: distribution
+      };
+    } catch (error) {
+      this.logger.error('Error generating daily distribution:', error);
       return {
         statusCode: 500,
         message: 'Something went wrong',

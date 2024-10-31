@@ -1,5 +1,5 @@
 import { User } from '../schemas/user.schema';
-import { MetricComparison, PlanAnalytics } from '../types/user-analytics.type';
+import { MetricComparison, PlanAnalytics, DailyUserDistribution } from '../types/user-analytics.type';
 
 interface Plan {
   plan_name: string;
@@ -98,4 +98,46 @@ export function calculateRetentionMetrics(users: User[]): {
     oneTimeUsers,
     returnRate
   };
+}
+
+export function calculateDailyDistribution(users: User[]): DailyUserDistribution[] {
+  const dailyMap = new Map<string, DailyUserDistribution>();
+  
+  // Process new users by creation date
+  users.forEach(user => {
+    const dateCreated = new Date(user.date_created);
+    const dateKey = dateCreated.toISOString().split('T')[0];
+    
+    if (!dailyMap.has(dateKey)) {
+      dailyMap.set(dateKey, {
+        date: dateKey,
+        newUsers: 0,
+        returningUsers: 0
+      });
+    }
+    
+    dailyMap.get(dateKey)!.newUsers++;
+  });
+
+  // Process returning users by update date
+  users.forEach(user => {
+    if (!isReturningUser(user) || !user.updated_at) return;
+    
+    const updateDate = new Date(user.updated_at);
+    const dateKey = updateDate.toISOString().split('T')[0];
+    
+    if (!dailyMap.has(dateKey)) {
+      dailyMap.set(dateKey, {
+        date: dateKey,
+        newUsers: 0,
+        returningUsers: 0
+      });
+    }
+    
+    dailyMap.get(dateKey)!.returningUsers++;
+  });
+
+  // Convert to array and sort by date
+  return Array.from(dailyMap.values())
+    .sort((a, b) => a.date.localeCompare(b.date));
 } 

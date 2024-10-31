@@ -47,4 +47,10 @@ export interface UserAnalytics {
     oneTimeUsers: MetricComparison;
     returnRate: MetricComparison;
   };
+}
+
+export interface DailyUserDistribution {
+  date: string;
+  newUsers: number;
+  returningUsers: number;
 } 

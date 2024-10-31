@@ -1,7 +1,7 @@
 import { Controller, Get, Param, ParseIntPipe, Logger } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 import { ApiResponse } from '../shared/types/api-response.type';
-import { UserAnalytics } from './types/user-analytics.type';
+import { DailyUserDistribution, UserAnalytics } from './types/user-analytics.type';
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -27,7 +27,20 @@ export class AnalyticsController {
       throw error;
     }
   }
-
+  
+  @Get("daily-distribution")
+  async getDailyDistribution(): Promise<ApiResponse<DailyUserDistribution[]>> {
+    this.logger.log('Getting daily distribution');
+    try {
+      const result = await this.analyticsService.getDailyDistribution();
+      this.logger.log('Daily distribution retrieved successfully');
+      return result;
+    } catch (error) {
+      this.logger.error('Error getting daily distribution:', error);
+      throw error;
+    }
+  }
+  
   @Get(':days')
   async getAnalytics(
     @Param('days', ParseIntPipe) days: number
@@ -42,4 +55,5 @@ export class AnalyticsController {
       throw error;
     }
   }
+
 } 
