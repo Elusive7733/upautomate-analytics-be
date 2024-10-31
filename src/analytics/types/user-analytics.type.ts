@@ -42,4 +42,9 @@ export interface UserAnalytics {
     unverifiedProfiles: MetricComparison;
     profilesWithData: MetricComparison;
   };
+  userRetention: {
+    returningUsers: MetricComparison;
+    oneTimeUsers: MetricComparison;
+    returnRate: MetricComparison;
+  };
 } 

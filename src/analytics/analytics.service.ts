@@ -7,7 +7,8 @@ import {
   calculatePlanAnalytics, 
   filterUsersByDateRange, 
   createMetricComparison,
-  calculateAverage 
+  calculateAverage,
+  calculateRetentionMetrics 
 } from './helpers/analytics.helper';
 
 @Injectable()
@@ -39,21 +40,35 @@ export class AnalyticsService {
 
       const allUsers = usersResponse.data;
       const currentEnd = new Date();
+      currentEnd.setHours(23, 59, 59, 999);
       const currentStart = new Date();
       
-      if (days) {
-        currentStart.setDate(currentStart.getDate() - days);
-      } else {
-        currentStart.setFullYear(2020);
-      }
+      let previousStart: Date;
+      let previousEnd: Date;
       
-      const previousStart = new Date(currentStart);
-      const previousPeriodLength = days || 
-        Math.ceil((currentEnd.getTime() - currentStart.getTime()) / (1000 * 60 * 60 * 24));
-      previousStart.setDate(previousStart.getDate() - previousPeriodLength);
+      if (days) {
+        currentStart.setDate(currentStart.getDate() - (days - 1));
+        currentStart.setHours(0, 0, 0, 0);
+        
+        previousEnd = new Date(currentStart);
+        previousEnd.setDate(previousEnd.getDate() - 1);
+        previousEnd.setHours(23, 59, 59, 999);
+        
+        previousStart = new Date(previousEnd);
+        previousStart.setDate(previousStart.getDate() - (days - 1));
+        previousStart.setHours(0, 0, 0, 0);
+      } else {
+        currentStart.setFullYear(2020, 0, 1);
+        currentStart.setHours(0, 0, 0, 0);
+        
+        previousStart = new Date(currentStart);
+        previousEnd = new Date(currentStart);
+      }
 
       const currentUsers = filterUsersByDateRange(allUsers, currentStart, currentEnd);
-      const previousUsers = filterUsersByDateRange(allUsers, previousStart, currentStart);
+      const previousUsers = days ? 
+        filterUsersByDateRange(allUsers, previousStart, previousEnd) : 
+        [];
 
       if (currentUsers.length === 0) {
         return {
@@ -63,10 +78,13 @@ export class AnalyticsService {
         };
       }
 
+      const currentRetention = calculateRetentionMetrics(currentUsers);
+      const previousRetention = calculateRetentionMetrics(previousUsers);
+
       const analytics: UserAnalytics = {
         timeRange: {
           current: { start: currentStart, end: currentEnd },
-          previous: { start: previousStart, end: currentStart }
+          previous: { start: previousStart, end: previousEnd }
         },
         userMetrics: {
           totalUsers: createMetricComparison(
@@ -132,6 +150,20 @@ export class AnalyticsService {
           profilesWithData: createMetricComparison(
             currentUsers.filter(u => u.upwork_data).length,
             previousUsers.filter(u => u.upwork_data).length
+          )
+        },
+        userRetention: {
+          returningUsers: createMetricComparison(
+            currentRetention.returningUsers,
+            previousRetention.returningUsers
+          ),
+          oneTimeUsers: createMetricComparison(
+            currentRetention.oneTimeUsers,
+            previousRetention.oneTimeUsers
+          ),
+          returnRate: createMetricComparison(
+            currentRetention.returnRate,
+            previousRetention.returnRate
           )
         }
       };

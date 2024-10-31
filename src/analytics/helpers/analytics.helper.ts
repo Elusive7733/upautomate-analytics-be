@@ -67,4 +67,35 @@ export function calculateAverage(users: User[], valueGetter: (user: User) => num
   if (users.length === 0) return 0;
   const sum = users.reduce((acc, user) => acc + valueGetter(user), 0);
   return Math.round((sum / users.length) * 100) / 100;
+}
+
+export function isSameDay(date1: Date, date2: Date): boolean {
+  return date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate();
+}
+
+export function isReturningUser(user: User): boolean {
+  if (!user.updated_at || !user.date_created) {
+    return false;
+  }
+  const updatedAt = new Date(user.updated_at);
+  const dateCreated = new Date(user.date_created);
+  return !isSameDay(updatedAt, dateCreated);
+}
+
+export function calculateRetentionMetrics(users: User[]): {
+  returningUsers: number;
+  oneTimeUsers: number;
+  returnRate: number;
+} {
+  const returningUsers = users.filter(isReturningUser).length;
+  const oneTimeUsers = users.length - returningUsers;
+  const returnRate = users.length > 0 ? (returningUsers / users.length) * 100 : 0;
+
+  return {
+    returningUsers,
+    oneTimeUsers,
+    returnRate
+  };
 } 
