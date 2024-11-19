@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from '../analytics/schemas/user.schema';
 import { ApiResponse } from '../shared/types/api-response.type';
-import { BLACKLISTED_EMAILS } from '../shared/constants/blacklisted-emails.constant';
+import { isDummyEmail } from '../shared/utils/email.util';
 
 @Injectable()
 export class UsersService {
@@ -14,9 +14,7 @@ export class UsersService {
   async getAllUsers(): Promise<ApiResponse<User[]>> {
     try {
       const users = await this.userModel
-        .find({
-          email: { $nin: BLACKLISTED_EMAILS }
-        })
+        .find()
         .populate({
           path: 'plan_id',
           model: 'plan'
@@ -28,7 +26,9 @@ export class UsersService {
         .lean()
         .exec();
 
-      if (!users || users.length === 0) {
+      const filteredUsers = users.filter(user => !isDummyEmail(user.email));
+
+      if (!filteredUsers || filteredUsers.length === 0) {
         return {
           statusCode: 404,
           message: 'No users found',
@@ -39,7 +39,7 @@ export class UsersService {
       return {
         statusCode: 200,
         message: 'Users retrieved successfully',
-        data: users as User[]
+        data: filteredUsers as User[]
       };
     } catch (error) {
       console.error('Error fetching users:', error);

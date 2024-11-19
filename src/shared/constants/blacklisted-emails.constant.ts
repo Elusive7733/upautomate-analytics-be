@@ -15,5 +15,8 @@ export const BLACKLISTED_EMAILS = [
   'faakhirzahid@bleedai.com',
   'linux@gmail.com',
   'arshiirazii@gmail.com',
-  'zahidfaakhir@gmail.com'
+  'zahidfaakhir@gmail.com',
+  'testingg@mailinator.com',
+  'test@mailinator.com',
+  'sophiya.58288@iqra.edu.pk'
 ]; 
