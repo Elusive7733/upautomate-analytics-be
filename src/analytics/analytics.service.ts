@@ -158,6 +158,10 @@ export class AnalyticsService {
             currentRetention.returningUsers,
             previousRetention.returningUsers
           ),
+          interactingUsers: createMetricComparison(
+            currentRetention.interactingUsers,
+            previousRetention.interactingUsers
+          ),
           oneTimeUsers: createMetricComparison(
             currentRetention.oneTimeUsers,
             previousRetention.oneTimeUsers
@@ -165,6 +169,10 @@ export class AnalyticsService {
           returnRate: createMetricComparison(
             currentRetention.returnRate,
             previousRetention.returnRate
+          ),
+          interactionRate: createMetricComparison(
+            currentRetention.interactionRate,
+            previousRetention.interactionRate
           )
         }
       };

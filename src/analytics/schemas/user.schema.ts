@@ -93,6 +93,9 @@ export class User extends Document {
   @Prop()
   updated_at?: string;
 
+  @Prop()
+  last_login?: string;
+
   // New fields for relationships
   @Prop([{ type: MongooseSchema.Types.ObjectId, ref: 'feed' }])
   feeds?: string[];

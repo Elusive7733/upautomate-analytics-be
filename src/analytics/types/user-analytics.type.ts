@@ -46,6 +46,8 @@ export interface UserAnalytics {
     returningUsers: MetricComparison;
     oneTimeUsers: MetricComparison;
     returnRate: MetricComparison;
+    interactionRate: MetricComparison;
+    interactingUsers: MetricComparison;
   };
 }
 
@@ -53,4 +55,5 @@ export interface DailyUserDistribution {
   date: string;
   newUsers: number;
   returningUsers: number;
+  interactingUsers: number;
 } 

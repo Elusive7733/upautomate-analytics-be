@@ -75,7 +75,7 @@ export function isSameDay(date1: Date, date2: Date): boolean {
     date1.getDate() === date2.getDate();
 }
 
-export function isReturningUser(user: User): boolean {
+export function isInteractingUser(user: User): boolean {
   if (!user.updated_at || !user.date_created) {
     return false;
   }
@@ -84,19 +84,34 @@ export function isReturningUser(user: User): boolean {
   return !isSameDay(updatedAt, dateCreated);
 }
 
+export function isReturningUser(user: User): boolean {
+  if (!user.last_login || !user.date_created) {
+    return false;
+  }
+  const lastLogin = new Date(user.last_login);
+  const dateCreated = new Date(user.date_created);
+  return !isSameDay(lastLogin, dateCreated);
+}
+
 export function calculateRetentionMetrics(users: User[]): {
   returningUsers: number;
+  interactingUsers: number;
   oneTimeUsers: number;
   returnRate: number;
+  interactionRate: number;
 } {
   const returningUsers = users.filter(isReturningUser).length;
-  const oneTimeUsers = users.length - returningUsers;
+  const interactingUsers = users.filter(isInteractingUser).length;
+  const oneTimeUsers = users.length - interactingUsers;
   const returnRate = users.length > 0 ? (returningUsers / users.length) * 100 : 0;
+  const interactionRate = users.length > 0 ? (interactingUsers / users.length) * 100 : 0;
 
   return {
     returningUsers,
+    interactingUsers,
     oneTimeUsers,
-    returnRate
+    returnRate,
+    interactionRate
   };
 }
 
@@ -112,25 +127,27 @@ export function calculateDailyDistribution(users: User[]): DailyUserDistribution
       dailyMap.set(dateKey, {
         date: dateKey,
         newUsers: 0,
-        returningUsers: 0
+        returningUsers: 0,
+        interactingUsers: 0
       });
     }
     
     dailyMap.get(dateKey)!.newUsers++;
   });
 
-  // Process returning users by update date
+  // Process returning users by last login date
   users.forEach(user => {
-    if (!isReturningUser(user) || !user.updated_at) return;
+    if (!isReturningUser(user) || !user.last_login) return;
     
-    const updateDate = new Date(user.updated_at);
-    const dateKey = updateDate.toISOString().split('T')[0];
+    const lastLogin = new Date(user.last_login);
+    const dateKey = lastLogin.toISOString().split('T')[0];
     
     if (!dailyMap.has(dateKey)) {
       dailyMap.set(dateKey, {
         date: dateKey,
         newUsers: 0,
-        returningUsers: 0
+        returningUsers: 0,
+        interactingUsers: 0
       });
     }
     
