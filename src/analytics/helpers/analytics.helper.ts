@@ -154,6 +154,26 @@ export function calculateDailyDistribution(users: User[]): DailyUserDistribution
     dailyMap.get(dateKey)!.returningUsers++;
   });
 
+
+  // Process interacting users by updated_at date
+  users.forEach(user => {
+    if (!isInteractingUser(user) || !user.updated_at) return;
+    
+    const updatedAt = new Date(user.updated_at);
+    const dateKey = updatedAt.toISOString().split('T')[0];
+    
+    if (!dailyMap.has(dateKey)) {
+      dailyMap.set(dateKey, {
+        date: dateKey,
+        newUsers: 0,
+        returningUsers: 0,
+        interactingUsers: 0
+      });
+    }
+    
+    dailyMap.get(dateKey)!.interactingUsers++;
+  });
+
   // Convert to array and sort by date
   return Array.from(dailyMap.values())
     .sort((a, b) => a.date.localeCompare(b.date));
